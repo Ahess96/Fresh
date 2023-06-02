@@ -40,14 +40,11 @@ for (let i = 0; i < 1000; i++) {
 
 function generateFeatures(totalFeatures) {
     const features = [];
-    // for (const item_id of itemIDs) {
-        const numFeatures = faker.number.int({min: 1, max: Math.min(totalFeatures, 10)});
-        for (let i = 0; i < numFeatures; i++) {
-            const feature = faker.commerce.productAdjective();
-            features.push(feature);
-        }
-    // }
-    console.log(features);
+    // const numFeatures = faker.number.int({min: 1, max: Math.min(totalFeatures, 10)});
+    for (let i = 0; i < 100; i++) {
+        const feature = faker.commerce.productAdjective();
+        features.push(feature);
+    }
     return features;
 }
 
@@ -55,19 +52,17 @@ const totalFeatures = 10;
 const features = generateFeatures(totalFeatures);
 
 
-function generateColors(itemIDs, minColors, maxColors) {
+function generateColors(minColors, maxColors) {
     const colors = [];
-    for (const item_id of itemIDs) {
-        const numColors = faker.number.int({min: minColors, max: maxColors});
-        for (let i = 0; i < numColors; i++) {
-            const color_name = faker.color.human();
-            colors.push([color_name, item_id]);
-        }
+    // const numColors = faker.number.int({min: minColors, max: maxColors});
+    for (let i = 0; i < 50; i++) {
+        const color_name = faker.color.human();
+        colors.push(color_name);
     }
     return colors;
 }
 
-const colors = generateColors(items.map(item => item[0]), 1, 10);
+const colors = generateColors(1, 10);
 
 
 function generateReviews(itemIDs, userIDs) {
@@ -103,22 +98,20 @@ async function seedData() {
         // }
 
         // insert items statement
-        const itemQuery = 'INSERT INTO items (name, price, description, sku) VALUES ($1, $2, $3, $4)';
-        const itemValues = items.map(({name, price, description, sku}) => [name, price, description, sku]);        
+        // const itemQuery = 'INSERT INTO items (name, price, description, sku) VALUES ($1, $2, $3, $4)';
+        // const itemValues = items.map(({name, price, description, sku}) => [name, price, description, sku]);        
 
-        //execute insert item statment
-        for (const values of itemValues) {
-            await client.query(itemQuery, values);
-        }
+        // //execute insert item statment
+        // for (const values of itemValues) {
+        //     await client.query(itemQuery, values);
+        // }
 
         // query for inserted items to retrieve id's given by postgres
         // Select last 100 data points
-        const selectQuery = 'SELECT id FROM items ORDER BY id DESC LIMIT 1000';
-        const result = await client.query(selectQuery);
-        const last1000DataPoints = result.rows;
-
-        console.log('Last 1000 data points:');
-        console.log(last1000DataPoints);
+        // const selectQuery = 'SELECT id FROM features';
+        // const result = await client.query(selectQuery);
+        // const featureIDs = result.rows;
+        // console.log(featureIDs)
 
         // insert features statement
         const featureQuery = 'INSERT INTO features (features) VALUES ($1)';
@@ -128,11 +121,13 @@ async function seedData() {
             await client.query(featureQuery, values);
         }
         // insert colors statement
-        // const colorQuery = 'INSERT INTO colors (color_name, item_id) VALUES ($1, $2)';
-        // const colorValues = colors;
+        const colorQuery = 'INSERT INTO colors (color_name) VALUES ($1)';
+        const colorValues = colors.map(color => [color]);
 
-        // // execute insert colors statement
-        // await client.query(colorQuery, colorValues);
+        // execute insert colors statement
+        for (const values of colorValues) {
+            await client.query(colorQuery, values);
+        }
 
         // // insert reviews statement
         // const reviewQuery = 'INSERT INTO reviews (content, item_id, user_id) VALUES ($1, $2, $3)';
