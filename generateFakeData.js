@@ -88,15 +88,13 @@ async function seedData() {
         await client.query('BEGIN');
 
         // query for inserted features and colors to retrieve id's given by postgres
-        // const selectFeaturesQuery = 'SELECT id FROM features';
-        // const featuresResult = await client.query(selectFeaturesQuery);
-        // const featureIDs = featuresResult.rows;
-        // grab random ids
+        const selectFeaturesQuery = 'SELECT id FROM features';
+        const featuresResult = await client.query(selectFeaturesQuery);
+        const featureIDs = featuresResult.rows.map(obj => obj.id);
 
-
-        const selectColorsQuery = 'SELECT id FROM colors';
-        const colorsResults = await client.query(selectColorsQuery);
-        const colorIDs = colorsResults.rows.map(obj => obj.id);
+        // const selectColorsQuery = 'SELECT id FROM colors';
+        // const colorsResults = await client.query(selectColorsQuery);
+        // const colorIDs = colorsResults.rows.map(obj => obj.id);
         
         const selectItemsQuery = 'SELECT id FROM items';
         const itemsResults = await client.query(selectItemsQuery);
@@ -106,26 +104,41 @@ async function seedData() {
         const generateRandomNumber = () => Math.floor(Math.random() * 15) + 1;
 
         // create tables for M:M relationships
-        // items : colors
+        // items : features
         for (const itemID of itemsIDs) {
-            const numOfColors = generateRandomNumber();
-            const randomColorIDs = [];
-            // select unique colorIDs
-            while (randomColorIDs.length < numOfColors) {
-                const randomIdx = Math.floor(Math.random() * colorIDs.length);
-                const randomColorID = colorIDs[randomIdx];
-
-                if(!randomColorIDs.includes(randomColorID)) {
-                    randomColorIDs.push(randomColorID);
+            const numOfFeatures = generateRandomNumber();
+            const randomFeatureIDs = [];
+            while (randomFeatureIDs.length < numOfFeatures) {
+                const randomIdx = Math.floor(Math.random() * featureIDs.length);
+                const randomFeatureID = featureIDs[randomIdx];
+                if (!randomFeatureIDs.includes(randomFeatureID)) {
+                    randomFeatureIDs.push(randomFeatureID);
                 }
             }
-
-            for (const colorID of randomColorIDs) {
-                const itemColorsQuery = 'INSERT INTO item_colors (item_id, color_id) VALUES ($1, $2)';
-                await client.query(itemColorsQuery, [itemID, colorID])
+            for (const featureID of randomFeatureIDs) {
+                const itemFeaturesQuery = 'INSERT INTO item_features (item_id, feature_id) VALUES ($1, $2)'
+                await client.query(itemFeaturesQuery, [itemID, featureID])
             }
-        } 
-        
+        }
+        // items : colors
+        // for (const itemID of itemsIDs) {
+        //     const numOfColors = generateRandomNumber();
+        //     const randomColorIDs = [];
+        //     // select unique colorIDs
+        //     while (randomColorIDs.length < numOfColors) {
+        //         const randomIdx = Math.floor(Math.random() * colorIDs.length);
+        //         const randomColorID = colorIDs[randomIdx];
+
+        //         if(!randomColorIDs.includes(randomColorID)) {
+        //             randomColorIDs.push(randomColorID);
+        //         }
+        //     }
+
+        //     for (const colorID of randomColorIDs) {
+        //         const itemColorsQuery = 'INSERT INTO item_colors (item_id, color_id) VALUES ($1, $2)';
+        //         await client.query(itemColorsQuery, [itemID, colorID])
+        //     }
+        // }    
 
         // insert users statement
         // const userQuery = 'INSERT INTO users (name, address) VALUES ($1, $2)';
