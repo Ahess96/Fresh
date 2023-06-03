@@ -17,7 +17,7 @@ function generateUsers() {
 }
 
 const users = [];
-for (let i = 0; i < 200; i++) {
+for (let i = 0; i < 600; i++) {
     const user = generateUsers();
     users.push(user);
 }
@@ -66,18 +66,17 @@ const colors = generateColors(1, 10);
 
 function generateReviews(itemIDs, userIDs) {
     const reviews = [];
-    for (const item_id of itemIDs) {
+    for (const itemID of itemIDs) {
         const numReviews = faker.number.int({min: 1, max: 50});
         for (let i = 0; i < numReviews; i++) {
             const content = faker.lorem.sentences();
-            const user_id = userIDs[faker.number.int({ min: 0, max: userIDs.length - 1 })];
-            reviews.push([content, item_id, user_id]);
+            const rating = Math.floor(Math.random() * 5) + 1;
+            const userID = userIDs[faker.number.int({ min: 0, max: userIDs.length - 1 })];
+            reviews.push([content, itemID, userID, rating]);
         }
     }
     return reviews;
 }
-
-const reviews = generateReviews(items.map(item => item[0]), users.map(user => user.id));
 
 
 async function seedData() {
@@ -88,9 +87,9 @@ async function seedData() {
         await client.query('BEGIN');
 
         // query for inserted features and colors to retrieve id's given by postgres
-        const selectFeaturesQuery = 'SELECT id FROM features';
-        const featuresResult = await client.query(selectFeaturesQuery);
-        const featureIDs = featuresResult.rows.map(obj => obj.id);
+        // const selectFeaturesQuery = 'SELECT id FROM features';
+        // const featuresResult = await client.query(selectFeaturesQuery);
+        // const featureIDs = featuresResult.rows.map(obj => obj.id);
 
         // const selectColorsQuery = 'SELECT id FROM colors';
         // const colorsResults = await client.query(selectColorsQuery);
@@ -100,26 +99,30 @@ async function seedData() {
         const itemsResults = await client.query(selectItemsQuery);
         const itemsIDs = itemsResults.rows.map(obj => obj.id);
 
+        const selectUsersQuery = 'SELECT id FROM users';
+        const usersResults = await client.query(selectUsersQuery);
+        const usersIDs = usersResults.rows.map(obj => obj.id);
+
         // create random assignment of random number of colors to each item
-        const generateRandomNumber = () => Math.floor(Math.random() * 15) + 1;
+        // const generateRandomNumber = () => Math.floor(Math.random() * 15) + 1;
 
         // create tables for M:M relationships
         // items : features
-        for (const itemID of itemsIDs) {
-            const numOfFeatures = generateRandomNumber();
-            const randomFeatureIDs = [];
-            while (randomFeatureIDs.length < numOfFeatures) {
-                const randomIdx = Math.floor(Math.random() * featureIDs.length);
-                const randomFeatureID = featureIDs[randomIdx];
-                if (!randomFeatureIDs.includes(randomFeatureID)) {
-                    randomFeatureIDs.push(randomFeatureID);
-                }
-            }
-            for (const featureID of randomFeatureIDs) {
-                const itemFeaturesQuery = 'INSERT INTO item_features (item_id, feature_id) VALUES ($1, $2)'
-                await client.query(itemFeaturesQuery, [itemID, featureID])
-            }
-        }
+        // for (const itemID of itemsIDs) {
+        //     const numOfFeatures = generateRandomNumber();
+        //     const randomFeatureIDs = [];
+        //     while (randomFeatureIDs.length < numOfFeatures) {
+        //         const randomIdx = Math.floor(Math.random() * featureIDs.length);
+        //         const randomFeatureID = featureIDs[randomIdx];
+        //         if (!randomFeatureIDs.includes(randomFeatureID)) {
+        //             randomFeatureIDs.push(randomFeatureID);
+        //         }
+        //     }
+        //     for (const featureID of randomFeatureIDs) {
+        //         const itemFeaturesQuery = 'INSERT INTO item_features (item_id, feature_id) VALUES ($1, $2)'
+        //         await client.query(itemFeaturesQuery, [itemID, featureID])
+        //     }
+        // }
         // items : colors
         // for (const itemID of itemsIDs) {
         //     const numOfColors = generateRandomNumber();
@@ -175,13 +178,15 @@ async function seedData() {
         //     await client.query(colorQuery, values);
         // }
 
-        // // insert reviews statement
-        // const reviewQuery = 'INSERT INTO reviews (content, item_id, user_id) VALUES ($1, $2, $3)';
-        // const reviewValues = reviews;
+        // insert reviews statement
+        const reviews = generateReviews(itemsIDs, usersIDs);
+        const reviewQuery = 'INSERT INTO reviews (content, item_id, user_id, rating) VALUES ($1, $2, $3, $4)';
+        const reviewValues = reviews.map(review => [review[0], review[1], review[2], review[3]]);
 
-        // // execute insert reviews statement
-        // await client.query(reviewQuery, reviewValues);
-
+        // execute insert reviews statement
+        for (const values of reviewValues) {
+            await client.query(reviewQuery, values);
+        }
         //commit transaction
         await client.query('COMMIT');
 
