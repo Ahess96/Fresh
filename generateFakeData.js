@@ -28,7 +28,6 @@ function generateItemData() {
     const description = faker.commerce.productDescription();
     const price = faker.commerce.price();
     const sku = faker.string.uuid();
-
     return {name, price, description, sku};
 }
 
@@ -88,6 +87,46 @@ async function seedData() {
         client = await pool.connect();
         await client.query('BEGIN');
 
+        // query for inserted features and colors to retrieve id's given by postgres
+        // const selectFeaturesQuery = 'SELECT id FROM features';
+        // const featuresResult = await client.query(selectFeaturesQuery);
+        // const featureIDs = featuresResult.rows;
+        // grab random ids
+
+
+        const selectColorsQuery = 'SELECT id FROM colors';
+        const colorsResults = await client.query(selectColorsQuery);
+        const colorIDs = colorsResults.rows.map(obj => obj.id);
+        
+        const selectItemsQuery = 'SELECT id FROM items';
+        const itemsResults = await client.query(selectItemsQuery);
+        const itemsIDs = itemsResults.rows.map(obj => obj.id);
+
+        // create random assignment of random number of colors to each item
+        const generateRandomNumber = () => Math.floor(Math.random() * 15) + 1;
+
+        // create tables for M:M relationships
+        // items : colors
+        for (const itemID of itemsIDs) {
+            const numOfColors = generateRandomNumber();
+            const randomColorIDs = [];
+            // select unique colorIDs
+            while (randomColorIDs.length < numOfColors) {
+                const randomIdx = Math.floor(Math.random() * colorIDs.length);
+                const randomColorID = colorIDs[randomIdx];
+
+                if(!randomColorIDs.includes(randomColorID)) {
+                    randomColorIDs.push(randomColorID);
+                }
+            }
+
+            for (const colorID of randomColorIDs) {
+                const itemColorsQuery = 'INSERT INTO item_colors (item_id, color_id) VALUES ($1, $2)';
+                await client.query(itemColorsQuery, [itemID, colorID])
+            }
+        } 
+        
+
         // insert users statement
         // const userQuery = 'INSERT INTO users (name, address) VALUES ($1, $2)';
         // const userValues = users.map(({ name, address }) => [name, address]);
@@ -99,35 +138,29 @@ async function seedData() {
 
         // insert items statement
         // const itemQuery = 'INSERT INTO items (name, price, description, sku) VALUES ($1, $2, $3, $4)';
-        // const itemValues = items.map(({name, price, description, sku}) => [name, price, description, sku]);        
+        // const itemValues = items.map(({name, price, description, sku}) => [name, price, description, sku]
+        // );        
 
         // //execute insert item statment
         // for (const values of itemValues) {
         //     await client.query(itemQuery, values);
         // }
 
-        // query for inserted items to retrieve id's given by postgres
-        // Select last 100 data points
-        // const selectQuery = 'SELECT id FROM features';
-        // const result = await client.query(selectQuery);
-        // const featureIDs = result.rows;
-        // console.log(featureIDs)
-
         // insert features statement
-        const featureQuery = 'INSERT INTO features (features) VALUES ($1)';
-        const featureValues = features.map(feature => [feature]);
+        // const featureQuery = 'INSERT INTO features (features) VALUES ($1)';
+        // const featureValues = features.map(feature => [feature]);
 
-        for (const values of featureValues) {
-            await client.query(featureQuery, values);
-        }
-        // insert colors statement
-        const colorQuery = 'INSERT INTO colors (color_name) VALUES ($1)';
-        const colorValues = colors.map(color => [color]);
+        // for (const values of featureValues) {
+        //     await client.query(featureQuery, values);
+        // }
+        // // insert colors statement
+        // const colorQuery = 'INSERT INTO colors (color_name) VALUES ($1)';
+        // const colorValues = colors.map(color => [color]);
 
-        // execute insert colors statement
-        for (const values of colorValues) {
-            await client.query(colorQuery, values);
-        }
+        // // execute insert colors statement
+        // for (const values of colorValues) {
+        //     await client.query(colorQuery, values);
+        // }
 
         // // insert reviews statement
         // const reviewQuery = 'INSERT INTO reviews (content, item_id, user_id) VALUES ($1, $2, $3)';
