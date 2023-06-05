@@ -95,13 +95,13 @@ async function seedData() {
         // const colorsResults = await client.query(selectColorsQuery);
         // const colorIDs = colorsResults.rows.map(obj => obj.id);
         
-        const selectItemsQuery = 'SELECT id FROM items';
-        const itemsResults = await client.query(selectItemsQuery);
-        const itemsIDs = itemsResults.rows.map(obj => obj.id);
+        // const selectItemsQuery = 'SELECT * FROM items ORDER BY id DESC LIMIT 1000';
+        // const itemsResults = await client.query(selectItemsQuery);
+        // const itemsIDs = itemsResults.rows.map(obj => obj.id);
 
-        const selectUsersQuery = 'SELECT id FROM users';
-        const usersResults = await client.query(selectUsersQuery);
-        const usersIDs = usersResults.rows.map(obj => obj.id);
+        // const selectUsersQuery = 'SELECT id FROM users';
+        // const usersResults = await client.query(selectUsersQuery);
+        // const usersIDs = usersResults.rows.map(obj => obj.id);
 
         // create random assignment of random number of colors to each item
         // const generateRandomNumber = () => Math.floor(Math.random() * 15) + 1;
@@ -123,7 +123,7 @@ async function seedData() {
         //         await client.query(itemFeaturesQuery, [itemID, featureID])
         //     }
         // }
-        // items : colors
+        // // items : colors
         // for (const itemID of itemsIDs) {
         //     const numOfColors = generateRandomNumber();
         //     const randomColorIDs = [];
@@ -179,14 +179,14 @@ async function seedData() {
         // }
 
         // insert reviews statement
-        const reviews = generateReviews(itemsIDs, usersIDs);
-        const reviewQuery = 'INSERT INTO reviews (content, item_id, user_id, rating) VALUES ($1, $2, $3, $4)';
-        const reviewValues = reviews.map(review => [review[0], review[1], review[2], review[3]]);
+        // const reviews = generateReviews(itemsIDs, usersIDs);
+        // const reviewQuery = 'INSERT INTO reviews (content, item_id, user_id, rating) VALUES ($1, $2, $3, $4)';
+        // const reviewValues = reviews.map(review => [review[0], review[1], review[2], review[3]]);
 
-        // execute insert reviews statement
-        for (const values of reviewValues) {
-            await client.query(reviewQuery, values);
-        }
+        // // execute insert reviews statement
+        // for (const values of reviewValues) {
+        //     await client.query(reviewQuery, values);
+        // }
         //commit transaction
         await client.query('COMMIT');
 
