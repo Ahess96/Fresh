@@ -3,6 +3,7 @@ const router = express.Router();
 const itemsCtrl = require('../../controllers/api/items');
 
 router.get('/', itemsCtrl.getQueriedItems);
+router.get('/user/:id', itemsCtrl.getUser);
 router.get('/:id', itemsCtrl.getItemDetails);
 router.get('/:id/reviews', itemsCtrl.getItemReviews);
 

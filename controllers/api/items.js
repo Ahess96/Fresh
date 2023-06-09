@@ -4,6 +4,7 @@ module.exports = {
     getQueriedItems,
     getItemDetails,
     getItemReviews,
+    getUser,
 }
 
 
@@ -70,6 +71,28 @@ async function getItemReviews(req, res) {
         const results = await client.query(query);
         const reviews = results.rows;
         res.status(200).json(reviews);
+    } catch (err) {
+        console.error('Cannot retrieve item details', err)
+        res.status(500).json({ error: "Internal server error" });
+    }
+}
+
+async function getUser(req, res) {
+    // ID will be pass as req.params.id
+    const reqparams = {
+        id: 614
+    }
+
+    try {
+        const query = `
+        SELECT DISTINCT * FROM users AS u
+        WHERE u.id = ${reqparams.id}
+        `;
+
+        const results = await client.query(query);
+        const user = results.rows[0];
+
+        res.status(200).json(user);
     } catch (err) {
         console.error('Cannot retrieve item details', err)
         res.status(500).json({ error: "Internal server error" });
