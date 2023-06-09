@@ -3,6 +3,7 @@ const client = require("../../config/database")
 module.exports = {
     getQueriedItems,
     getItemDetails,
+    getItemReviews,
 }
 
 
@@ -28,11 +29,12 @@ async function getQueriedItems(req, res) {
 async function getItemDetails(req, res) {
     // ID will be pass as req.params.id
     const reqparams = {
-        id: 12008
+        id: 12006
     }
     // ITEM DESCRIPTION, PRICE, NAME, SKU WILL BE PASSED DOWN AS PROP ON FRONT END TO PREVENT REDUNDANT QUERY
     try {
         const itemID = reqparams.id;
+        // select distinct colors and features belonging to an item and aggregate them into arrays
         const query = `
             SELECT i.*, ARRAY_AGG(DISTINCT c.color_name) AS colors, ARRAY_AGG(DISTINCT f.features) AS features
             FROM items AS i
@@ -47,21 +49,29 @@ async function getItemDetails(req, res) {
         const results = await client.query(query);
         const itemDetails = results.rows[0];
 
-        // add all features and colors to first result
-        // let colors = [];
-        // let features = [];
-        // for (const row of results.rows) {
-        //     if (row.color_name) colors.push(row.color_name);
-        //     if (row.features) features.push(row.features);
-        // }
-
-        // // add features and colors to item details
-        // itemDetails.color_name = colors;
-        // itemDetails.features = features;
-
-        res.json(itemDetails);
+        res.status(200).json(itemDetails);
     } catch (err) {
        console.error('Cannot retrieve item details', err)
        res.status(500).json({ error: "Internal server error" });
+    }
+}
+
+async function getItemReviews(req, res) {
+    // ID will be pass as req.params.id
+    const reqparams = {
+        id: 12008
+    }
+    try {
+        const query = `
+        SELECT * FROM reviews AS r  
+        WHERE r.item_id = ${reqparams.id}
+        `;
+
+        const results = await client.query(query);
+        const reviews = results.rows;
+        res.status(200).json(reviews);
+    } catch (err) {
+        console.error('Cannot retrieve item details', err)
+        res.status(500).json({ error: "Internal server error" });
     }
 }
