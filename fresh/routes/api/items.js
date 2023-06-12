@@ -52,6 +52,80 @@ router.get('/items', itemsCtrl.getQueriedItems);
 
 /**
  * @swagger
+ * /items/{ id }:
+ *   get:
+ *     summary: View Information About a Item
+ *     description: Retrieve a list of information about the item.
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: integer
+ *         description: The id of an item.
+ *         required: true
+ *     responses:
+ *       200:
+ *         description: Success
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Item'
+ */
+router.get('/items/:id', itemsCtrl.getItemDetails);
+
+/**
+ * @swagger
+ * /items/{ id }/reviews:
+ *   get:
+ *     summary: View Reviews of an Item
+ *     description: Retrieve all reviews about a specific item.
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: integer
+ *         description: The id of an item.
+ *         required: true
+ *     responses:
+ *       200:
+ *         description: Success
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Review'
+ */
+
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     Review:
+ *       type: object
+ *       properties:
+ *         id:
+ *           type: integer
+ *           description: The ID of the review.
+ *         content:
+ *           type: string
+ *           description: The content of the item.
+ *         rating:
+ *           type: integer
+ *           description: The price of the item.
+ *         item_id:
+ *           type: integer
+ *           description: The id of the corresponding item.
+ *         user_id:
+ *           type: integer
+ *           description: The id of the corresponding user.
+ */
+router.get('/items/:id/reviews', itemsCtrl.getItemReviews);
+
+/**
+ * @swagger
  * /user/{ id }:
  *   get:
  *     summary: View Information About a User
@@ -70,7 +144,7 @@ router.get('/items', itemsCtrl.getQueriedItems);
  *           application/json:
  *             schema:
  *               type: array
- *               users:
+ *               items:
  *                 $ref: '#/components/schemas/User'
  *             example:
  *               id: 1
@@ -96,7 +170,5 @@ router.get('/items', itemsCtrl.getQueriedItems);
  *           description: The address of the user.
  */
 router.get('/user/:id', itemsCtrl.getUser);
-router.get('/items/:id', itemsCtrl.getItemDetails);
-router.get('/items/:id/reviews', itemsCtrl.getItemReviews);
 
 module.exports = router;
