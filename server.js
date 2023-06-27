@@ -10,6 +10,7 @@ require('./config/database');
 const app = express();
 app.use(logger('dev'));
 app.use(express.json());
+app.use(express.static('public'));
 swaggerSetup(app);
 
 // Configure static middleware
@@ -18,8 +19,6 @@ app.use(express.static(path.join(__dirname, 'dist')));
 
 // Put API routes here, before the "catch all" route
 app.use('/', require('./routes/api/items'));
-
-app.use('/loaderio-b545ed4722925ceeaeb062a1d35fcf05/', require('./loaderio-b545ed4722925ceeaeb062a1d35fcf05'))
 
 // The following "catch all" route (note the *) is necessary
 // to return the index.html on all non-AJAX requests
