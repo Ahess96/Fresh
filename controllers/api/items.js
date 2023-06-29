@@ -16,8 +16,9 @@ async function getQueriedItems(req, res) {
         // initial query with true condition
         let query = 'SELECT * FROM items WHERE 1=1';
         if (re.name) {
-            query += ` AND name ILIKE '%${re.name}%' LIMIT 50`;
+            query += ` AND name ILIKE '%${re.name}%'`;
         }
+        query += ' Limit 50'
         const results = await client.query(query);
         const items = results.rows;
         res.status(200).json(items)
