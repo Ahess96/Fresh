@@ -1,5 +1,6 @@
 require('dotenv').config();
 const express = require('express');
+const compression = require('compression');
 const logger = require('morgan');
 const path = require('path');
 const swaggerSetup = require('./swagger');
@@ -12,6 +13,18 @@ app.use(logger('dev'));
 app.use(express.json());
 app.use(express.static('public'));
 swaggerSetup(app);
+
+// Implement compression to improve decrease bandwidth and file size
+app.use(compression({
+  level: -1,
+  threshold: 10 * 1000,
+  filter: (req, res) => {
+    if (req.headers['x-no-compression']) {
+      return false;
+    }
+    return compression.filter(req, res);
+  },
+}))
 
 // Configure static middleware
 // to serve from the production 'dist' folder
