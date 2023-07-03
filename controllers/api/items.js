@@ -1,4 +1,4 @@
-const client = require("../../config/database")
+const pool = require("../../config/database")
 
 module.exports = {
     getQueriedItems,
@@ -9,6 +9,7 @@ module.exports = {
 
 
 async function getQueriedItems(req, res) {
+    let client;
     try {
         const re = {
             name: 'hand'
@@ -19,16 +20,23 @@ async function getQueriedItems(req, res) {
             query += ` AND name ILIKE '%${re.name}%'`;
         }
         query += ' Limit 50'
+
+        client = await pool.connect();
         const results = await client.query(query);
         const items = results.rows;
         res.status(200).json(items)
     } catch (err) {
         console.error('Cannot retrieve items matching your query', err)
         res.status(500).json({ error: "Internal server error" });
+    } finally {
+        if (client) {
+            client.release();
+        }
     }
 }
 
 async function getItemDetails(req, res) {
+    let client;
     // ID will be pass as req.params.id
     const reqparams = {
         id: 12006
@@ -48,6 +56,7 @@ async function getItemDetails(req, res) {
             GROUP BY i.id;
         `;    
 
+        client = await pool.connect();
         const results = await client.query(query);
         const itemDetails = results.rows[0];
 
@@ -55,10 +64,15 @@ async function getItemDetails(req, res) {
     } catch (err) {
        console.error('Cannot retrieve item details', err)
        res.status(500).json({ error: "Internal server error" });
+    } finally {
+        if (client) {
+            client.release();
+        }
     }
 }
 
 async function getItemReviews(req, res) {
+    let client;
     // ID will be pass as req.params.id
     const reqparams = {
         id: 12008
@@ -68,17 +82,22 @@ async function getItemReviews(req, res) {
         SELECT * FROM reviews AS r  
         WHERE r.item_id = ${reqparams.id}
         `;
-
+        client = await pool.connect();
         const results = await client.query(query);
         const reviews = results.rows;
         res.status(200).json(reviews);
     } catch (err) {
         console.error('Cannot retrieve item details', err)
         res.status(500).json({ error: "Internal server error" });
+    } finally {
+        if (client) {
+            client.release();
+        }
     }
 }
 
 async function getUser(req, res) {
+    let client;
     // ID will be pass as req.params.id
     const reqparams = {
         id: 614
@@ -89,7 +108,7 @@ async function getUser(req, res) {
         SELECT DISTINCT * FROM users AS u
         WHERE u.id = ${reqparams.id}
         `;
-
+        client = await pool.connect();
         const results = await client.query(query);
         const user = results.rows[0];
 
@@ -97,5 +116,9 @@ async function getUser(req, res) {
     } catch (err) {
         console.error('Cannot retrieve item details', err)
         res.status(500).json({ error: "Internal server error" });
+    } finally {
+        if (client) {
+            client.release();
+        }
     }
 }
