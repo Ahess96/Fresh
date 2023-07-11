@@ -8,7 +8,7 @@ module.exports = {
 }
 
 
-async function getQueriedItems(req, res) {
+async function getQueriedItems(req, res, next) {
     let client;
     try {
         const re = {
@@ -27,7 +27,11 @@ async function getQueriedItems(req, res) {
         res.status(200).json(items)
     } catch (err) {
         console.error('Cannot retrieve items matching your query', err)
-        res.status(500).json({ error: "Internal server error" });
+        if (next) {
+            next(err)
+        } else {
+            res.status(500).json({ error: "Internal server error" });
+        }
     } finally {
         if (client) {
             client.release();

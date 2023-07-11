@@ -16,9 +16,11 @@ swaggerSetup(app);
 
 // Implement compression to improve decrease bandwidth and file size
 app.use(compression({
+  // sets to default compression
   level: -1,
   threshold: 10 * 1000,
   filter: (req, res) => {
+    // dont compress if specified not to
     if (req.headers['x-no-compression']) {
       return false;
     }

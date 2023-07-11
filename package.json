@@ -6,17 +6,21 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint src --ext js,jsx --report-unused-disable-directives --max-warnings 0",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "mocha"
   },
   "dependencies": {
+    "chai": "^4.3.7",
     "compression": "^1.7.4",
     "dotenv": "^16.1.4",
     "express": "^4.18.2",
     "faker": "^6.6.6",
+    "mocha": "^10.2.0",
     "morgan": "^1.10.0",
     "pg": "^8.11.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "sinon": "^15.2.0",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^4.6.3",
     "swagger-ui-react": "^4.19.1"
