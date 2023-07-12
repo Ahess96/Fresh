@@ -64,4 +64,27 @@ describe('getQueriedItems', function() {
         // release
         expect(clientMock.release.calledOnce).to.be.true;
     });
+
+    it('should release the connection after query', async function() {
+        const expectedItems = [
+          { id: 1, name: 'Item 1' },
+          { id: 2, name: 'Item 2' },
+        ];
+    
+        const queryStub = sinon.stub().resolves({ rows: expectedItems });
+        const releaseStub = sinon.stub();
+    
+        const clientMock = {
+          query: queryStub,
+          release: releaseStub,
+        };
+    
+        sinon.stub(pool, 'connect').resolves(clientMock);
+    
+        await itemsCtrl.getQueriedItems(req, res, next);
+    
+        expect(releaseStub.calledOnce).to.be.true;
+    
+        pool.connect.restore();
+      });
 });
