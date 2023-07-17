@@ -35,7 +35,7 @@ app.use(express.static(path.join(__dirname, 'dist')));
 // Put API routes here, before the "catch all" route
 app.use('/', require('./routes/api/items'));
 
-// The following "catch all" route (note the *) is necessary
+// The following "catch all" route
 // to return the index.html on all non-AJAX requests
 app.get('/*', function(req, res) {
     res.sendFile(path.join(__dirname, 'dist', 'index.html'));

@@ -134,3 +134,25 @@ Ensure you have the following installed on your local machine before attempting 
     RDS_DB_NAME=<db_name>
     RDS_PASSWORD=<password>
     ```
+
+Adjust the values as needed.
+
+### Database Setup
+
+1. Create the database using psql
+
+    ``` bash
+    createdb fresh
+    ```
+
+2. Create the tables using the schemas provided above.
+3. Seed data using the 'generateFakeData.js' file in the root of the project directory. I recommend seeding the data in chunks to prevent crashing your system.
+4. Deploy database to an **Amazon RDS** instance. If you're unsure how to do this, consult [this link](https://www.commandprompt.com/education/how-to-migrate-local-postgresql-database-to-aws-rds/#:~:text=To%20migrate%20the%20local%20PostgreSQL%20database%20to%20the%20AWS%20RDS,file%20from%20the%20local%20directory.). I used the default settings for the free tier.
+
+### API Documentation
+
+All routes are thoroughly documented using **Swagger.io**, which provides a clean GUI to navigate the API. Use 'nodemon server' in the CLI and navigate to [here](http://localhost:3000/api-docs/#/default). Otherwise, consult '/routes/api/items.js'.
+
+## Scaling the Application
+
+The main purpose of Fresh is to be a scaleable application.
