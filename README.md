@@ -155,4 +155,18 @@ All routes are thoroughly documented using **Swagger.io**, which provides a clea
 
 ## Scaling the Application
 
-The main purpose of Fresh is to be a scaleable application.
+The main purpose of Fresh is to be a scaleable application capable of handling thousands of requests per second. Implementing horizontal scaling and load balancing are key to this project's functionality.
+
+### Horizontal Scaling
+
+Identical backend APIs of Fresh are hosted on three identical **Ubuntu AWS EC2** instances. Here, horizontal scaling is a more favorable approach to app development than vertical scaling because it requires less memory (cheaper) and can handle requests more efficiently and consistently. Three **t2 micro** instances are used because they are in the AWS free tier and three is an appropriate amount to handle the volume I'm interested in. **Amazon Machine Images (AMIs)** were created from an initial EC2 instance to ensure each is an exact replica and creates more consistent and predictable performance outcomes.
+
+### Nginx Load Balancing
+
+Nginx is used as a reverse proxy and load balancer for Fresh. It is deployed to a separate **Ubuntu t2 medium** server to accomodate thousands of requests per second. As discussed below in *"Load Testing"*, using a t2 micro instance proved inadequate and resulted in bottlenecking at high request volumes.
+
+*IP Hash* is the most effective load balancing technique in stress test environments for Fresh as revealed by many tests using **Loader.io**. This may be because this method is particularly useful for maintaining session persistance.
+
+Refer to 'nginx.conf' in the root directory for the exact configuration of **Nginx**.
+
+## Stress Tests Using Loader.io
