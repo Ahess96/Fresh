@@ -170,3 +170,9 @@ Nginx is used as a reverse proxy and load balancer for Fresh. It is deployed to 
 Refer to 'nginx.conf' in the root directory for the exact configuration of **Nginx**.
 
 ## Stress Tests Using Loader.io
+
+[Loader.io](https://loader.io/) allows for load tests on an application and is capable of creating thousands of requests per second from different IP addresses. It's an appropriate tool for stress tests on Fresh because it provides data on the Average Response Time (ART) and the Error Rate (ER) for each stress testing environment. It also allows you to define the desired request volume and distribution of the requests over time. The results discussed below were configured to simulate ability of Fresh to handle a certain number of Clients per Second (c/s).
+
+Stress tests revealed that I am able to horizontally scale and load balance Fresh to respond up to **56 times faster** than it would as a single instance server. Additionally, this scaled version of Fresh can handle %333 more c/s while staying below a 6500 ms ART.
+
+![Loader Results](url./../public/Image%207-14-23%20at%208.07%20AM.jpg)
