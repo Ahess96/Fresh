@@ -4,20 +4,38 @@
 
 ## Nginx Scaled Backend API
 
-Fresh is a horizontally scaled *ExpressJS* and *NodeJS* backend application capable of handling thousands of requests per second. It's a mock e-commerce site designed to quickly query a **PostgreSQL** database deployed to an **AWS RDS** instance that may contain up to 1.777 x 10^30 possible datapoint combinations. **Nginx** is configured to act as a *reverse proxy* and *load balancer* for 3 identical APIs deployed to identical **AWS EC2** instances to handle over a quarter million requests per minute to a single endpoint. All routes are cleanly documented using **Swagger.io**.
+Fresh is a highly scaleable *ExpressJS* backend API capable of handling thousands of requests per second. It's a mock e-commerce site designed to quickly query a **PostgreSQL** database deployed to an **AWS RDS** instance that may contain up to 1.777 x 10^30 possible datapoint combinations. **Nginx** is configured to act as a *reverse proxy* and *load balancer* for 3 identical APIs deployed to identical **AWS EC2** instances to handle over a quarter million requests per minute to a single endpoint. All routes are cleanly documented using **Swagger.io**.
 
 ## Table of Contents
 
-- [PostgreSQL Schemas](#postgresql-schemas)
-- [Seeding Data with Faker.JS](#seeding-data-with-fakerjs)
-- [Running the API](#running-the-api)
-- [Scaling the Application](#scaling-the-application)
-- [Stress Tests Using Loader.io](#stress-tests-using-loaderio)
-- [Future Enhancements](#future-enhancements)
+- [Fresh](#fresh)
+  - [Nginx Scaled Backend API](#nginx-scaled-backend-api)
+  - [Table of Contents](#table-of-contents)
+  - [PostgreSQL Schemas](#postgresql-schemas)
+    - [Item Schema](#item-schema)
+    - [Color Schema](#color-schema)
+    - [Feature Schema](#feature-schema)
+    - [User Schema](#user-schema)
+    - [Using Conjunction Tables](#using-conjunction-tables)
+      - [Item\_features Schema](#item_features-schema)
+      - [Item\_colors Schema](#item_colors-schema)
+  - [Seeding Data with FakerJS](#seeding-data-with-fakerjs)
+  - [Running the API](#running-the-api)
+    - [Prerequisites](#prerequisites)
+    - [Installation](#installation)
+    - [Configuration](#configuration)
+    - [Database Setup](#database-setup)
+    - [API Documentation](#api-documentation)
+  - [Scaling the Application](#scaling-the-application)
+    - [Horizontal Scaling](#horizontal-scaling)
+    - [Nginx Load Balancing](#nginx-load-balancing)
+  - [Stress Tests Using Loader.io](#stress-tests-using-loaderio)
+  - [Testing](#testing)
+  - [Future Enhancements](#future-enhancements)
 
 ## PostgreSQL Schemas
 
-Easy querying and quick accessibility are the primary considerations for developing an application of this scale. I leveraged two primary tools provided by postgreSQL to accomplish this: indexing and conjunction tables. Indexing frequently searched table columns significantly increases access speeds. The foreign keys referenced in conjunction tables are also important to index to greatly increase the speed of queries involving join tables.
+Easy querying and quick accessibility are the primary considerations for developing an application of this scale. I leveraged two primary tools provided by **PostgreSQL** to accomplish this: indexing and conjunction tables. Indexing frequently searched table columns significantly increases access speeds. The foreign keys referenced in conjunction tables are also important to index to greatly increase the speed of queries involving join tables.
 
 Fresh contains a schema for *item*, *color*, *feature*, *user* and *review* at its core. There are 10,000 items each with up to 10 possible colors (from a pool of 50), up to 10 possible features (from a pool of 100) and up to 50 unique reviews from a pool of 1000 users.
 
@@ -47,7 +65,7 @@ Fresh contains a schema for *item*, *color*, *feature*, *user* and *review* at i
 
 ### Using Conjunction Tables
 
-The features and colors are reuseable in this application to allow for less storage use and more efficient development. PostgreSQL conjunction tables conveniently allow many to many relationships to be formed between items and colors and items and features by implementing table joins when querying the database.
+The features and colors are reuseable in this application to allow for less storage use and more efficient development. **PostgreSQL** conjunction tables conveniently allow many to many relationships to be formed between items and colors and items and features by implementing table joins when querying the database.
 
 Logic preventing redundant assignment of colors and features to the same item was performed on the creation of the conjunction tables. This allows for a cleaner database, faster load times when querying the database and eliminates the need for any front end polishing of the data.
 
@@ -65,7 +83,7 @@ Logic preventing redundant assignment of colors and features to the same item wa
 
 ## Seeding Data with FakerJS
 
-FakerJS allows for the quick generation of thousands of datapoints thanks to their built in methods. To simulate realistic data, but not spend months creating it, data was generated as follows:
+**FakerJS** allows for the quick generation of thousands of datapoints thanks to their built in methods. To simulate realistic data, but not spend months creating it, data was generated as follows:
 
 ``` javascript
 function generateItemData() {
@@ -168,7 +186,7 @@ All routes are thoroughly documented using **Swagger.io**, which provides a clea
 
 ## Scaling the Application
 
-The main purpose of Fresh is to be a scaleable application capable of handling thousands of requests per second. Implementing horizontal scaling and load balancing are key to this project's functionality.
+The main purpose of Fresh is to be a highly scaleable application capable of handling thousands of requests per second. Implementing horizontal scaling and load balancing are key to this project's functionality.
 
 ### Horizontal Scaling
 
@@ -176,7 +194,7 @@ Identical backend APIs of Fresh are hosted on three identical **Ubuntu AWS EC2**
 
 ### Nginx Load Balancing
 
-Nginx is used as a reverse proxy and load balancer for Fresh. It is deployed to a separate **Ubuntu t2 medium** server to accomodate thousands of requests per second. As discussed below in *"Load Testing"*, using a t2 micro instance proved inadequate and resulted in bottlenecking at high request volumes.
+**Nginx** is used as a reverse proxy and load balancer for Fresh. It is deployed to a separate **Ubuntu t2 medium** server to accomodate thousands of requests per second. As discussed below in *"Load Testing"*, using a t2 micro instance proved inadequate and resulted in bottlenecking at high request volumes.
 
 *IP Hash* is the most effective load balancing technique in stress test environments for Fresh as revealed by many tests using **Loader.io**. This may be because this method is particularly useful for maintaining session persistance.
 
@@ -188,12 +206,21 @@ Refer to 'nginx.conf' in the root directory for the exact configuration of **Ngi
 
 ![Loader Results](url./../public/Image%207-14-23%20at%208.07%20AM.jpg)
 
-Stress tests revealed that I am able to horizontally scale and load balance Fresh to respond up to **56 times faster** than it would as a single instance server. Additionally, this scaled version of Fresh can handle **333 percent** more c/s while staying below a 6500 ms ART and having a mere 0.3 percent ER.
+Stress tests revealed that I am able to horizontally scale and load balance Fresh to respond up to **56 times faster** than it would as a single instance server. Additionally, this scaled version of Fresh can handle **333 percent** more c/s while staying below a 6500 ms ART at very high requests (5500 C/S) and having a mere 0.3 percent ER.
 
 Express compression is also installed as a dependency to improve response time but the most effective performance variables are in the 'nginx.conf' file. Each line is annotated as needed to explain the utility of implemented configurations.
+
+## Testing
+
+**Chai**, **Mocha** and **Sinon** were used to generate tests on the controllers and database connection. **Sinon** makes it expecially easy to mock dependencies and perform asynchronous operations. Tests developed for each controller and the database connection ensure that Fresh can easily grow and become more scaleable without error.
+
+To further aid in growth, it would be valuable to dedicate individual files to each controller as the complexity of database queries becomes more nuanced.
 
 ## Future Enhancements
 
 Fresh is currently a backend application, so one of the most obvious additions would be designing a front end using React.JS.
 
 Performance wise, Fresh would likely have a faster ART if it was horizontally scaled to include additional servers, say four or five instead of three. It seems for every additional backend server the apps performance increased two-fold. Of course, Nginx bottlenecking will occur at some point with the addition of servers, so upgrading the server that it is hosted is likely required as well.
+
+Creating an **AWS RDS Proxy** would also likely increase the scaleability of Fresh. It is a fully managed service that would increase security,
+use connection pooling and distribute the request load.
