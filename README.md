@@ -1,8 +1,19 @@
 # Fresh
 
+![Express](https://img.shields.io/badge/Express.js-404D59?style=for-the-badge) ![NodeJS](https://img.shields.io/badge/Node.js-43853D?style=for-the-badge&logo=node.js&logoColor=white) ![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black) ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white) ![AWS](https://img.shields.io/badge/Amazon_AWS-232F3E?style=for-the-badge&logo=amazon-aws&logoColor=white) ![Sinon](https://img.shields.io/badge/sinon.js-323330?style=for-the-badge&logo=sinon) ![Chai](https://img.shields.io/badge/chai.js-323330?style=for-the-badge&logo=chai&logoColor=red) ![Mocha](https://img.shields.io/badge/mocha.js-323330?style=for-the-badge&logo=mocha&logoColor=Brown) ![Ubuntu](https://img.shields.io/badge/Ubuntu-E95420?style=for-the-badge&logo=ubuntu&logoColor=white) ![Nginx](https://img.shields.io/badge/nginx-%23009639.svg?style=for-the-badge&logo=nginx&logoColor=white) ![Swagger](https://img.shields.io/badge/-Swagger-%23Clojure?style=for-the-badge&logo=swagger&logoColor=white) ![Trello](https://img.shields.io/badge/Trello-%23026AA7.svg?style=for-the-badge&logo=Trello&logoColor=white) ![Postman](https://img.shields.io/badge/Postman-FF6C37?style=for-the-badge&logo=postman&logoColor=white)
+
 ## Nginx Scaled Backend API
 
-Fresh is a horizontally scaled application capable of handling thousands of requests per second. It's a mock e-commerce site designed to quickly query a **PostgreSQL** database deployed to an AWS RDS instance that may contain up to 1.777 * 10^30 possible datapoint combinations. **Nginx** is configured to act as a reverse proxy and load balancer for 3 identical APIs deployed to identical **AWS EC2** instances to handle over a quarter million requests per minute to a single endpoint. All routes are cleanly documented using **Swagger.io**.
+Fresh is a horizontally scaled *ExpressJS* and *NodeJS* backend application capable of handling thousands of requests per second. It's a mock e-commerce site designed to quickly query a **PostgreSQL** database deployed to an **AWS RDS** instance that may contain up to 1.777 x 10^30 possible datapoint combinations. **Nginx** is configured to act as a *reverse proxy* and *load balancer* for 3 identical APIs deployed to identical **AWS EC2** instances to handle over a quarter million requests per minute to a single endpoint. All routes are cleanly documented using **Swagger.io**.
+
+## Table of Contents
+
+- [PostgreSQL Schemas](#postgresql-schemas)
+- [Seeding Data with Faker.JS](#seeding-data-with-fakerjs)
+- [Running the API](#running-the-api)
+- [Scaling the Application](#scaling-the-application)
+- [Stress Tests Using Loader.io](#stress-tests-using-loaderio)
+- [Future Enhancements](#future-enhancements)
 
 ## PostgreSQL Schemas
 
@@ -34,19 +45,19 @@ Fresh contains a schema for *item*, *color*, *feature*, *user* and *review* at i
 - *name*: fictional name of user
 - *address*: string with realistic address
 
-## Using Conjunction Tables
+### Using Conjunction Tables
 
 The features and colors are reuseable in this application to allow for less storage use and more efficient development. PostgreSQL conjunction tables conveniently allow many to many relationships to be formed between items and colors and items and features by implementing table joins when querying the database.
 
 Logic preventing redundant assignment of colors and features to the same item was performed on the creation of the conjunction tables. This allows for a cleaner database, faster load times when querying the database and eliminates the need for any front end polishing of the data.
 
-### Item_features Schema
+#### Item_features Schema
 
 - *id*: unique identifier; primary key
 - *item_id*: individual id corresponding to one item row; foreign key
 - *feature_id*: individual id corresponding to one feature row; foreign key
 
-### Item_colors Schema
+#### Item_colors Schema
 
 - *id*: unique identifier; primary key
 - *item_id*: individual id corresponding to one item row; foreign key
@@ -151,6 +162,8 @@ Adjust the values as needed.
 
 ### API Documentation
 
+![Swagger Docs](https://media.giphy.com/media/JDqfZri81bXmZt8Ehd/giphy.gif)
+
 All routes are thoroughly documented using **Swagger.io**, which provides a clean GUI to navigate the API. Use 'nodemon server' in the CLI and navigate to [here](http://localhost:3000/api-docs/#/default). Otherwise, consult '/routes/api/items.js'.
 
 ## Scaling the Application
@@ -173,6 +186,14 @@ Refer to 'nginx.conf' in the root directory for the exact configuration of **Ngi
 
 [Loader.io](https://loader.io/) allows for load tests on an application and is capable of creating thousands of requests per second from different IP addresses. It's an appropriate tool for stress tests on Fresh because it provides data on the Average Response Time (ART) and the Error Rate (ER) for each stress testing environment. It also allows you to define the desired request volume and distribution of the requests over time. The results discussed below were configured to simulate ability of Fresh to handle a certain number of Clients per Second (c/s).
 
-Stress tests revealed that I am able to horizontally scale and load balance Fresh to respond up to **56 times faster** than it would as a single instance server. Additionally, this scaled version of Fresh can handle %333 more c/s while staying below a 6500 ms ART.
-
 ![Loader Results](url./../public/Image%207-14-23%20at%208.07%20AM.jpg)
+
+Stress tests revealed that I am able to horizontally scale and load balance Fresh to respond up to **56 times faster** than it would as a single instance server. Additionally, this scaled version of Fresh can handle **333 percent** more c/s while staying below a 6500 ms ART and having a mere 0.3 percent ER.
+
+Express compression is also installed as a dependency to improve response time but the most effective performance variables are in the 'nginx.conf' file. Each line is annotated as needed to explain the utility of implemented configurations.
+
+## Future Enhancements
+
+Fresh is currently a backend application, so one of the most obvious additions would be designing a front end using React.JS.
+
+Performance wise, Fresh would likely have a faster ART if it was horizontally scaled to include additional servers, say four or five instead of three. It seems for every additional backend server the apps performance increased two-fold. Of course, Nginx bottlenecking will occur at some point with the addition of servers, so upgrading the server that it is hosted is likely required as well.
